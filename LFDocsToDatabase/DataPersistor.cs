@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LFDocsToDatabase.Dtos;
+using System;
 
 namespace LFDocsToDatabase
 {

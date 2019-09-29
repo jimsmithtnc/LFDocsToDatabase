@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using LFDocsToDatabase.Dtos;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -92,13 +93,10 @@ namespace LFDocsToDatabase
             _data.OptionalDisturbances = GetText(_delimeters["Comments"])?.Split(Environment.NewLine);
             _data.References = GetText(_delimeters["References"]);
 
-            _data.ModelersReviewers = GetModelersReviewersTable(_delimeters["ModelersReviewers"]);
-            _data.DominantAndIndicatorSpecies = GetDominantAndIndicatorSpeciesTable(_delimeters["BpS Model/Description Version"]);
-            _data.FireFrequency = GetFireFrequencyTable(_delimeters["Fire Frequency"]);
-            _data.DeterministicTransitions = GetDeterministicTransitionsTable(_delimeters["Deterministic Transitions"]);
-            _data.ProbabilisticTransitions = GetProbabilisticTransitionsTable(_delimeters["Probabilistic Transitions"]);
+            SetTableData();
 
             // Update
+            // Mapping Rules
 
             // Class A
             // Class B
@@ -107,27 +105,131 @@ namespace LFDocsToDatabase
             // Class E
         }
 
-        private string GetModelersReviewersTable(List<int> list_of_ids)
+        private void SetTableData()
+        {
+            //_data.ModelersReviewers
+            foreach (OpenXmlElement item in _body)
+            {
+                if (item.GetType().Name == "Table")
+                {
+                    string line = item.InnerText;
+                    Console.WriteLine(line);
+                    if (line.StartsWith("ModelersReviewers"))
+                    {
+                        _data.ModelersReviewers = GetModelersReviewersTable(item);
+                    }
+                    else if (line.StartsWith("SymbolScientific NameCommon Name") && !line.StartsWith("SymbolScientific NameCommon NameCanopy Position"))
+                    {
+                        _data.DominantAndIndicatorSpecies = GetDominantAndIndicatorSpeciesTable(item);
+                    }
+                    else if (line.StartsWith("SeverityAvg FIPercent of All FiresMin FIMax FI"))
+                    {
+                        _data.FireFrequency = GetFireFrequencyTable(item);
+                    }
+                    else if (line.StartsWith("From ClassBegins at (yr)Succeeds toAfter (years)"))
+                    {
+                        _data.DeterministicTransitions = GetDeterministicTransitionsTable(item);
+                    }
+                    else if (line.StartsWith("Disturbance TypeDisturbance occurs InMoves vegetation toDisturbance ProbabilityReturn Interval (yrs)Reset Age to New Class Start Age After Disturbance?Years Since Last Disturbance"))
+                    {
+                        _data.ProbabilisticTransitions = GetProbabilisticTransitionsTable(item);
+                    }
+                }
+            }
+        }
+
+        private List<PeopleDto> GetModelersReviewersTable(OpenXmlElement item)
+        {
+            List<PeopleDto> people = new List<PeopleDto>();
+            foreach (OpenXmlElement subitem in item.ChildElements.Where(r => r.GetType().Name == "TableRow").Select(r => r).Skip(1))
+            {
+                string mname = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").FirstOrDefault().InnerText;
+                string memail = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(1).Take(1).FirstOrDefault().InnerText;
+                string rname = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(2).Take(1).FirstOrDefault().InnerText;
+                string remail = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(3).Take(1).FirstOrDefault().InnerText;
+
+                if ((mname != null && mname.Length > 0) || (memail != null && memail.Length > 0))
+                {
+                    PeopleDto p = new PeopleDto()
+                    {
+                        Name = mname != null && mname.Length > 0 ? mname : null,
+                        Email = memail != null && memail.Length > 0 ? memail.ToLower() : null,
+                        Role = "Modeler"
+                    };
+                    people.Add(p);
+                }
+                if ((rname != null && rname.Length > 0) || (remail != null && remail.Length > 0))
+                {
+                    PeopleDto p = new PeopleDto()
+                    {
+                        Name = rname != null && rname.Length > 0 ? rname : null,
+                        Email = remail != null && remail.Length > 0 ? remail.ToLower() : null,
+                        Role = "Reviewer"
+                    };
+                    people.Add(p);
+                }
+            }
+            return people;
+        }
+
+        private List<DominantAndIndicatorSpeciesDto> GetDominantAndIndicatorSpeciesTable(OpenXmlElement item)
+        {
+            List<DominantAndIndicatorSpeciesDto> spieces = new List<DominantAndIndicatorSpeciesDto>();
+            foreach (OpenXmlElement subitem in item.ChildElements.Where(r => r.GetType().Name == "TableRow").Select(r => r).Skip(1))
+            {
+                string symbol = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").FirstOrDefault().InnerText;
+                string scientific_name = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(1).Take(1).FirstOrDefault().InnerText;
+                string common_name = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(2).Take(1).FirstOrDefault().InnerText;
+
+                if ((symbol != null && symbol.Length > 0) ||
+                    (scientific_name != null && scientific_name.Length > 0) ||
+                    (common_name != null && common_name.Length > 0))
+                {
+                    DominantAndIndicatorSpeciesDto s = new DominantAndIndicatorSpeciesDto()
+                    {
+                        Symbol = symbol,
+                        ScientificName = scientific_name,
+                        CommonName = common_name
+                    };
+                    spieces.Add(s);
+                }
+            }
+            return spieces;
+        }
+
+        private List<FireFrequencyDto> GetFireFrequencyTable(OpenXmlElement item)
+        {
+            List<FireFrequencyDto> fire = new List<FireFrequencyDto>();
+            foreach (OpenXmlElement subitem in item.ChildElements.Where(r => r.GetType().Name == "TableRow").Select(r => r).Skip(1))
+            {
+                string severity = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").FirstOrDefault().InnerText;
+                string avgfi = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(1).Take(1).FirstOrDefault().InnerText;
+                string percent = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(2).Take(1).FirstOrDefault().InnerText;
+                string minfi = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(3).Take(1).FirstOrDefault().InnerText;
+                string maxfi = subitem.ChildElements.Where(r => r.GetType().Name == "TableCell").Skip(4).Take(1).FirstOrDefault().InnerText;
+
+                if ((severity != null && severity.Length > 0))
+                {
+                    FireFrequencyDto f = new FireFrequencyDto()
+                    {
+                        Severity = severity,
+                        AvgFI = avgfi != null && avgfi.Length > 0 ? avgfi : null,
+                        PercentOfAllFires = percent != null && percent.Length > 0 ? percent : null,
+                        MinFI = minfi != null && minfi.Length > 0 ? minfi : null,
+                        MaxFI = maxfi != null && maxfi.Length > 0 ? maxfi : null
+                    };
+                    fire.Add(f);
+                }
+            }
+            return fire;
+        }
+
+        private string GetDeterministicTransitionsTable(OpenXmlElement item)
         {
             throw new NotImplementedException();
         }
 
-        private string GetDominantAndIndicatorSpeciesTable(List<int> list_of_ids)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string GetFireFrequencyTable(List<int> list_of_ids)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string GetDeterministicTransitionsTable(List<int> list_of_ids)
-        {
-            throw new NotImplementedException();
-        }
-
-        private string GetProbabilisticTransitionsTable(List<int> list_of_ids)
+        private string GetProbabilisticTransitionsTable(OpenXmlElement item)
         {
             throw new NotImplementedException();
         }

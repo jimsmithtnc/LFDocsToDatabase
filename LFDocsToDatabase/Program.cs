@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using LFDocsToDatabase.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;

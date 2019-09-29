@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LFDocsToDatabase
+namespace LFDocsToDatabase.Dtos
 {
     internal class DataDto
     {
@@ -10,15 +10,15 @@ namespace LFDocsToDatabase
         public string Name { get; set; }
         public string ModelVersion { get; set; }
         public string Update { get; set; }
-        public string ModelersReviewers { get; set; }
+        public List<PeopleDto> ModelersReviewers { get; set; }
         public string VegetationType { get; set; }
         public string MapZones { get; set; }
         public string GeographicRange { get; set; }
         public string BiophysicalSiteDescription { get; set; }
         public string VegetationDescription { get; set; }
-        public string DominantAndIndicatorSpecies { get; set; }
+        public List<DominantAndIndicatorSpeciesDto> DominantAndIndicatorSpecies { get; set; }
         public string DisturbanceDescription { get; set; }
-        public string FireFrequency { get; set; }
+        public List<FireFrequencyDto> FireFrequency { get; set; }
         public string ScaleDescription { get; set; }
         public string AdjacencyOrIdentificationConcerns { get; set; }
         public string IssuesOrProblems { get; set; }
