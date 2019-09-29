@@ -1,7 +1,10 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LFDocsToDatabase
@@ -40,6 +43,10 @@ namespace LFDocsToDatabase
             { "Probabilistic Transitions", new List<int>() },
             { "Optional Disturbances", new List<int>() },
             { "References", new List<int>() },
+
+            // Empty section headers
+            { "Succession Classes", new List<int>() },
+            { "Model Parameters", new List<int>() },
         };
 
         public DataExtractor(string doc_path)
@@ -62,7 +69,91 @@ namespace LFDocsToDatabase
             FindIdAndTitle();
             FindDelimeters();
 
+            PopulateDto();
+
             return _data;
+        }
+
+        private void PopulateDto()
+        {
+            _data.Id = GetText(_delimeters["Id"]);
+            _data.Name = GetText(_delimeters["Name"]);
+            _data.VegetationType = GetText(_delimeters["Vegetation Type"]);
+            _data.MapZones = GetText(_delimeters["Map Zones"]);
+            _data.GeographicRange = GetText(_delimeters["Geographic Range"]);
+            _data.BiophysicalSiteDescription = GetText(_delimeters["Biophysical Site Description"]);
+            _data.VegetationDescription = GetText(_delimeters["Vegetation Description"]);
+            _data.DisturbanceDescription = GetText(_delimeters["Disturbance Description"]);
+            _data.ScaleDescription = GetText(_delimeters["Scale Description"]);
+            _data.AdjacencyOrIdentificationConcerns = GetText(_delimeters["Adjacency or Identification Concerns"]);
+            _data.IssuesOrProblems = GetText(_delimeters["Issues or Problems"]);
+            _data.NativeUncharacteristicConditions = GetText(_delimeters["Native Uncharacteristic Conditions"]);
+            _data.Comments = GetText(_delimeters["Comments"]);
+            _data.OptionalDisturbances = GetText(_delimeters["Comments"])?.Split(Environment.NewLine);
+            _data.References = GetText(_delimeters["References"]);
+
+            _data.ModelersReviewers = GetModelersReviewersTable(_delimeters["ModelersReviewers"]);
+            _data.DominantAndIndicatorSpecies = GetDominantAndIndicatorSpeciesTable(_delimeters["BpS Model/Description Version"]);
+            _data.FireFrequency = GetFireFrequencyTable(_delimeters["Fire Frequency"]);
+            _data.DeterministicTransitions = GetDeterministicTransitionsTable(_delimeters["Deterministic Transitions"]);
+            _data.ProbabilisticTransitions = GetProbabilisticTransitionsTable(_delimeters["Probabilistic Transitions"]);
+
+            // Update
+
+            // Class A
+            // Class B
+            // Class C
+            // Class D
+            // Class E
+        }
+
+        private string GetModelersReviewersTable(List<int> list_of_ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetDominantAndIndicatorSpeciesTable(List<int> list_of_ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetFireFrequencyTable(List<int> list_of_ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetDeterministicTransitionsTable(List<int> list_of_ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetProbabilisticTransitionsTable(List<int> list_of_ids)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetText(List<int> list_of_ids)
+        {
+            if (list_of_ids.Count > 0)
+            {
+                //  new List<OpenXmlElement>(_body.GetEnumerator().to)
+                List<OpenXmlElement> list = new List<OpenXmlElement>();
+                foreach (OpenXmlElement item in _body)
+                    list.Add(item);
+                OpenXmlElement[] array = list.ToArray();
+
+                string text = "";
+                foreach (int id in list_of_ids)
+                {
+                    text += GetParagraphText(array[id]) + Environment.NewLine;
+                }
+                text = text.Trim();
+                if (text == string.Empty)
+                    return null;
+                else
+                    return text;
+            }
+            return null;
         }
 
         private void FindIdAndTitle()
@@ -92,7 +183,7 @@ namespace LFDocsToDatabase
                 {
                     if (item.InnerText.StartsWith(delimeter))
                     {
-                        _delimeters[delimeter].Add(count);
+                        //_delimeters[delimeter].Add(count); // Don't fetch the title.
                         previous_delimeter = delimeter;
                         was_delimeter_found = true;
                     }
@@ -103,9 +194,9 @@ namespace LFDocsToDatabase
             }
         }
 
-        private void GetParagraphText(OpenXmlElement item)
+        private string GetParagraphText(OpenXmlElement item)
         {
-            string text = item.InnerText;
+            return item.InnerText.Trim();
         }
     }
 }

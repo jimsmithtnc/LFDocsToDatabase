@@ -45,6 +45,7 @@ namespace LFDocsToDatabase
             Console.WriteLine("Processing file '{0}'.", path);
             DataExtractor de = new DataExtractor(path);
             DataDto data = de.GetData();
+            DataPersistor.SaveDataToDatabase(data);
             Console.WriteLine("  -- Processed file." + Environment.NewLine);
         }
     }
