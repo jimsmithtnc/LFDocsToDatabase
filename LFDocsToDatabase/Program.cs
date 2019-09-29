@@ -42,7 +42,10 @@ namespace LFDocsToDatabase
 
         public static void ProcessFile(string path)
         {
-            Console.WriteLine("Processed file '{0}'.", path);
+            Console.WriteLine("Processing file '{0}'.", path);
+            DataExtractor de = new DataExtractor(path);
+            DataDto data = de.GetData();
+            Console.WriteLine("  -- Processed file." + Environment.NewLine);
         }
     }
 

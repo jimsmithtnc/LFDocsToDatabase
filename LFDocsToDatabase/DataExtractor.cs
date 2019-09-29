@@ -12,5 +12,10 @@ namespace LFDocsToDatabase
         {
             _doc_path = doc_path;
         }
+
+        internal DataDto GetData()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
