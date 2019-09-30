@@ -29,9 +29,10 @@ namespace LFDocsToDatabase.Dtos
         public string ClassC { get; set; }
         public string ClassD { get; set; }
         public string ClassE { get; set; }
-        public string DeterministicTransitions { get; set; }
-        public string ProbabilisticTransitions { get; set; }
+        public List<DeterministicTransitionDto> DeterministicTransitions { get; set; }
+        public List<ProbabilisticTransitionDto> ProbabilisticTransitions { get; set; }
         public string[] OptionalDisturbances { get; set; }
         public string References { get; set; }
+        public List<MappingRuleDto> MappingRules { get; set; }
     }
 }
