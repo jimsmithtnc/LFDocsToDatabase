@@ -1,3 +1,5 @@
+/* TODO: Follow style guide: https://www.sqlstyle.guide/ */
+
 CREATE TABLE "BpSModel" (
   "BpsModel" varchar PRIMARY KEY,
   "BpSCode" numeric,
