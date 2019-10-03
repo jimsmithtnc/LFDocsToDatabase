@@ -96,9 +96,33 @@ namespace LFDocsToDatabase
 
             SetTableData();
 
-            //SetSuccessionClasses(); //ABCDE
+            SetSuccessionClasses(); //ABCDE
 
             // Update
+        }
+
+        private void SetSuccessionClasses()
+        {
+            foreach (string letter in new string[] { "A", "B", "C", "D", "E" })
+            {
+                List<int> paras_idx = _delimeters.Where(r => r.Key == $"Class {letter}").FirstOrDefault().Value;
+                for (int x = paras_idx.FirstOrDefault(); x < paras_idx.FirstOrDefault() + paras_idx.Count; x++)
+                {
+                    //"Class A8Early Development 1 - All Structures"
+                    string line = _body.Skip(x - 1).FirstOrDefault().InnerText;
+                    Tuple<string, string, string> success_class_info = GetSuccessClassInfo(line);
+                }
+            }
+        }
+
+        // TODO: finish extraction method
+        private Tuple<string, string, string> GetSuccessClassInfo(string line)
+        {
+            string part = line.Remove(0, 7);
+            string percentage = Regex.Split(part, @"[^\d]")[0];
+            part = line.Remove(0, percentage.Length);
+
+            return new Tuple<string, string, string>(percentage, null, null);
         }
 
         private void SetTableData()
@@ -109,7 +133,6 @@ namespace LFDocsToDatabase
                 if (item.GetType().Name == "Table")
                 {
                     string line = item.InnerText;
-                    Console.WriteLine(line);
                     if (line.StartsWith("ModelersReviewers"))
                     {
                         _data.ModelersReviewers = GetModelersReviewersTableData(item);
