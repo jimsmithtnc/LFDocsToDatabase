@@ -1,12 +1,13 @@
 /* TODO: Follow style guide: https://www.sqlstyle.guide/ */
 
 CREATE TABLE "BpSModel" (
-  "BpsModel" varchar PRIMARY KEY,
+  "BpsModelID" numeric PRIMARY KEY,
+  "BpsModel" varchar,
   "BpSCode" numeric,
   "BpSName" varchar,
-  "ModelSourceLit" varchar,
-  "ModelSourceExpert" varchar,
-  "ModelSourceLocal" varchar,
+  -- "ModelSourceLiterature" varchar,
+  -- "ModelSourceExpert" varchar,
+  -- "ModelSourceLocal" varchar,
   "LatestReviewDate" date,
   "VegetationType" varchar,
   "GeographicRange" varchar,
@@ -14,26 +15,89 @@ CREATE TABLE "BpSModel" (
   "VegetationDescription" varchar,
   "DisturbanceDescription" varchar,
   "ScaleDescription" varchar,
-  "ScaleSourceLit" varchar,
-  "ScaleSourceExpert" varchar,
-  "ScaleSourceLocal" varchar,
+  -- "ScaleSourceLiterature" varchar,
+  -- "ScaleSourceExpert" varchar,
+  -- "ScaleSourceLocal" varchar,
   "AdjacencyConcerns" varchar,
-  "FireRegimeGroup" varchar,
+  -- "FireRegimeGroup" varchar,
+  "Issues" varchar,
+  "NativeUncharacteristicConditions" varchar,
   "Comments" varchar,
-  "LumpSplitDescription" varchar,
-  "NativeUncharacteristicConditions" varchar
+  -- "LumpSplitDescription" varchar,
+  "Literature" varchar
 );
 
-CREATE TABLE "DominantIndicatorSpecies" (
-  "PlantID" varchar PRIMARY KEY,
-  "BpSModel" varchar
-);
-
-CREATE TABLE "ModelReviewer" (
+CREATE TABLE "Individual" (
   "IndividualID" numeric PRIMARY KEY,
-  "ModelerName" varchar,
-  "ModelerEmail" varchar
+  "Name" varchar,
+  "Email" varchar
 );
+
+CREATE TABLE "ModelerReviewer" (
+  "BpsModelID" numeric,
+  "IndividualID" numeric,
+  "RoleID" numeric,
+);
+
+CREATE TABLE "Role" (
+  "RoleID" numeric PRIMARY KEY,
+  "Role" varchar
+);
+
+-- Get the Plant ID list to populate a DB table
+-- and refer to it from this table.
+CREATE TABLE "DominantIndicatorSpecies" (
+  "DominantIndicatorSpecies" numeric PRIMARY KEY,
+  "PlantID" varchar PRIMARY KEY,
+  "BpSModelID" numeric
+);
+
+
+CREATE TABLE "FireFrequency" (
+  "FireFrequencyID" numeric PRIMARY KEY,
+  "BpSModelID" numeric,
+
+  "AvgFrequencyReplacement" varchar,
+  "AvgFrequencyModerate" varchar,
+  "AvgFrequencyLow" varchar,
+  "AvgFrequencyAll" varchar,
+
+  -- JIM -- to provide the forumula for the % all fires.
+
+  "MinFireFreqReplacement" numeric,
+  "MinFireFreqModerate" numeric,
+  "MinFireFreqLow" numeric,
+  "MaxFireFreqReplacement" numeric,
+  "MaxFireFreqModerate" numeric,
+  "MaxFireFreqLow" numeric,
+
+  -- "AvgHistFireSize" numeric,
+  -- "MinHistFireSize" numeric,
+  -- "MaxHistFireSize" numeric,
+  -- "ReplaceAvgFireSize" numeric,
+  -- "ReplaceMinFireSize" numeric,
+  -- "ReplaceMaxFireSize" numeric,
+  -- "MixAvgFireSize" numeric,
+  -- "MixMinFireSize" numeric,
+  -- "MixMaxFireSize" numeric,
+
+  -- "FireRegimeSourceLit" varchar,
+  -- "FireRegimeSourceExpertOp" varchar,
+  -- "FireRegimeSourceLocalData" varchar,
+
+  "DisturbanceWind" bit,
+  "DisturbanceInsectDisease" bit,
+  "DisturbanceNativeGrazing" bit,
+  "DisturbanceCompetition" bit,
+  "DisturbanceOther" bit,
+  "DisturbanceOtherDescription" varchar,
+  "DisturbanceOther2" bit,
+  "DisturbanceOther2Description" varchar,
+
+);
+
+-- Import the S Class Rules Spreadsheet
+
 
 CREATE TABLE "VocabPlantsChecklist" (
   "plants_checklist_id" int PRIMARY KEY,
@@ -53,42 +117,12 @@ CREATE TABLE "IssuesTracker" (
   "FutureAction" text
 );
 
-CREATE TABLE "Role" (
-  "ModelerReviewerID" numeric PRIMARY KEY,
-  "BpsModel" varchar,
-  "Role" varchar
-);
-
 CREATE TABLE "VegTypeLookup" (
   "VegTypeID" varchar PRIMARY KEY,
   "BpsModel" varcar,
   "VegTypeName" varchar
 );
 
-CREATE TABLE "FireFrequency" (
-  "BpSModel" varchar PRIMARY KEY,
-  "AvgHistFireSize" numeric,
-  "MinHistFireSize" numeric,
-  "MaxHistFireSize" numeric,
-  "ReplaceAvgFireSize" numeric,
-  "ReplaceMinFireSize" numeric,
-  "ReplaceMaxFireSize" numeric,
-  "MixAvgFireSize" numeric,
-  "MixMinFireSize" numeric,
-  "MixMaxFireSize" numeric,
-  "FireRegimeSourceLit" varchar,
-  "FireRegimeSourceExpertOp" varchar,
-  "FireRegimeSourceLocalData" varchar,
-  "DisturbanceWind" varchar,
-  "DisturbanceInsectDisease" varchar,
-  "DisturbanceNativeGrazing" varchar,
-  "DisturbanceCompetition" varchar,
-  "DisturbanceOther" varchar,
-  "DisturbanceOtherDescription" varchar,
-  "DisturbanceOther2" varchar,
-  "DisturbanceOther2Description" varchar,
-  "AllFireAvgFrequency" varchar
-);
 
 CREATE TABLE "SuccessionClass" (
   "BpSModel" varchar PRIMARY KEY,
